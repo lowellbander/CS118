@@ -6,7 +6,7 @@ OBJ = webserver.o
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-serverFork: $(OBJ)
+webserver: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 

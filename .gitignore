@@ -3,3 +3,8 @@
 *.log
 *.pdf
 *.synctex.gz
+
+#Server sections
+*.o
+webserver
+client
