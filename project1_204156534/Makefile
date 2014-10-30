@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-I.
 DEPS = # header file 
-OBJ = serverFork.o
+OBJ = webserver.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
