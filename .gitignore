@@ -1,0 +1,5 @@
+# only version control LaTeX source
+*.aux
+*.log
+*.pdf
+*.synctex.gz
