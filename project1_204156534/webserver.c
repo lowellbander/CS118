@@ -137,18 +137,18 @@ void dostuff (int sock)
     file = fopen(filename, "r");
 
     char* response;
-    int filelength;
+    int response_length;
 
     if (file) {
         
         // get the size of the file so we can copy it into a string
         fseek(file, 0L, SEEK_END);
-        filelength = ftell(file);
+        response_length = ftell(file);
         // seek back to the beginning
         fseek(file, 0L, SEEK_SET);
 
-        printf("\nFILE SIZE: %i\n", filelength);
-        response = (char*) malloc(filelength*sizeof(char));
+        printf("\nFILE SIZE: %i\n", response_length);
+        response = (char*) malloc(response_length*sizeof(char));
 
         int i = 0;
         while  ((c = getc(file)) != EOF) {
@@ -163,10 +163,15 @@ void dostuff (int sock)
     }
     else {
         // 404
-        bzero(response, filelength);
+        //bzero(response, response_length);
+        printf("returning 404");
+        response = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
+        response_length = strlen(response);
     }
    
-    n = write(sock, response, filelength);
+    printf("\nresponse:\n%s\n", response);
+
+    n = write(sock, response, response_length);
     if (n < 0) error("ERROR writing to socket");
     printf("write() returned %i\n", n);
 
