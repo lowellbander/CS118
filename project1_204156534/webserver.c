@@ -98,22 +98,44 @@ void dostuff (int sock)
     int c;
     FILE *file;
     file = fopen("index.html", "r");
+
+    char* response;
+    int filelength;
+
     if (file) {
-        while  ((c = getc(file)) != EOF)
-            putchar(c);
+        
+        // get the size of the file so we can copy it into a string
+        fseek(file, 0L, SEEK_END);
+        filelength = ftell(file);
+        // seek back to the beginning
+        fseek(file, 0L, SEEK_SET);
+
+        printf("\nFILE SIZE: %i\n", filelength);
+        response = (char*) malloc(filelength*sizeof(char));
+
+        int i = 0;
+        while  ((c = getc(file)) != EOF) {
+            response[i] = c;
+            ++i;
+        }
+
+        printf("\nTHE HTML:\n%s", response);
+        puts(response);
+
         fclose(file);
     }
-
+    else {
+        // what 
+    }
 
    bzero(buffer,256);
    n = read(sock,buffer,255);
-   if (n < 0) error("ERROR writing to socket");
+   if (n < 0) error("ERROR reading from socket");
 
-   n = write(sock,"<b>",3);
+    n = write(sock, response, filelength);
+    if (n < 0) error("ERROR writing to socket");
+    printf("write() returned %i\n", n);
 
    printf("Here is the message: %s\n",buffer);
 
-   n = write(sock,"I got your message",18);
-
-   n = write(sock,"</b>",4);
 }
