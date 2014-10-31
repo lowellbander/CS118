@@ -98,6 +98,7 @@ void dostuff (int sock)
     bzero(buffer,512);
     n = read(sock,buffer,511);
     if (n < 0) error("ERROR reading from socket");
+    else printf("\n%s\n",buffer);
     
     //tokenize request into headers
     char *headers = NULL;
@@ -107,7 +108,7 @@ void dostuff (int sock)
     char *httpLoc = strstr(buffer, " HTTP");
     if(path && httpLoc)
     {
-        printf("Found GET / and HTTP\n");    
+        //printf("Found GET / and HTTP\n");    
         path += 5;
         char *end = path;
        // printf("String: %s\n", end);
@@ -115,16 +116,16 @@ void dostuff (int sock)
         {
             end++;
         }
-        printf("Size of filename: %d\n",end-path);
+        //printf("Size of filename: %d\n",end-path);
 
         filename = (char*)malloc((end - path)*sizeof(char));
         strncpy(filename, path, end-path);
-        printf("\nFilename: %s\n", filename);
+        //printf("\nFilename: %s\n", filename);
     }
         
     headers = strtok(buffer, "\n");
     while(headers){
-        printf("Current header: %s\n",headers);
+        //printf("Current header: %s\n",headers);
         
         //get next header
         headers = strtok(NULL, "\n");
@@ -147,7 +148,7 @@ void dostuff (int sock)
         // seek back to the beginning
         fseek(file, 0L, SEEK_SET);
 
-        printf("\nFILE SIZE: %i\n", response_length);
+        //printf("\nFILE SIZE: %i\n", response_length);
         response = (char*) malloc(response_length*sizeof(char));
 
         int i = 0;
@@ -164,16 +165,16 @@ void dostuff (int sock)
     else {
         // 404
         //bzero(response, response_length);
-        printf("returning 404");
+        //printf("returning 404");
         response = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
         response_length = strlen(response);
     }
    
-    printf("\nresponse:\n%s\n", response);
+    //printf("\nresponse:\n%s\n", response);
 
     n = write(sock, response, response_length);
     if (n < 0) error("ERROR writing to socket");
-    printf("write() returned %i\n", n);
+    //printf("write() returned %i\n", n);
 
     //printf("Here is the message: %s\n",buffer);
 }
