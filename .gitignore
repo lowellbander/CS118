@@ -4,7 +4,9 @@
 *.pdf
 *.synctex.gz
 
-#Server sections
+# don't version control Make outputs
 *.o
 webserver
 client
+
+*.swp
