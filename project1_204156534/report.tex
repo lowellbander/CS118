@@ -14,9 +14,25 @@
 \author{Lowell Bander\\ UID 204 156 534\\ SEASnet Logon \texttt{paige} \and
 Akshay Bakshi\\ UID 104 160 782\\ SEASnet Logon \texttt{bakshi}}
 \maketitle
-\section{Server Design}
-\section{Difficulties}
-\section{Manual}
-\section{Tests}
+\tableofcontents
+\newpage
 
+\section{Server Design}
+\textit{Give a high-level description of your server’s design.}\\
+
+We began with the sample code provided in \texttt{serverFork.c}, and then added our own code which copied the request message from the socket to a local buffer, then printed the contents of the buffer to the console so as to satisfy the requirements in Part A. \\
+
+For Part B, we started by trying to return an HTML file whose name was hard coded into our source code. With that filename, we read the file into memory using \texttt{fopen()} and \texttt{getc()}. We then wrote this HTML to the client using \texttt{write()}. To complete Part B, we parsed the HTTP request header using a tokenizer to determine the requested filename, then either returned the contents of file or returned a 404 message if the file did not exist in the web server's directory. \\
+
+Finally, we noticed that the way our web server handles HTML files should probably perfectly for binary files, such as PNG files or executables. We tested this hypothesis and determined that it was correct.
+\section{Difficulties}
+\textit{What difficulties did you face and how did you solve them?}\\
+
+After creating our VM, we tried to install git, but were unsuccessful because the provided version of the OS is so old that it is no longer supported. In order to edit our source code in our host environment but still be able to test it in the guest VM, we created a shared folder.\\
+
+Once this was set up, our only remaining difficulties were not so much with understanding the network communication protocol as the were simple programming errors, such as forgetting to increment our index variable as we loop through an array or making errors in our pointer arithmetic. When one of us would run such a problem and not be able to solve it within a few minutes, we would have the other person check our code with a fresh pair of eyes.
+\section{Manual}
+\textit{Include a brief manual on how to compile and run your source code (if TAs can’t compile and run your source code by reading your manual, no credit would be given).}
+\section{Tests}
+\textit{Show some simple test results from your program (e.g. in Part A you should be able to see an HTTP request)}
 \end{document}

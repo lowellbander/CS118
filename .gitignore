@@ -3,6 +3,7 @@
 *.log
 *.pdf
 *.synctex.gz
+*.toc
 
 # don't version control Make outputs
 *.o
