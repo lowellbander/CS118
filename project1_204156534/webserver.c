@@ -94,18 +94,26 @@ void dostuff (int sock)
    int n;
    char buffer[256];
       
+    // Try reading from a file and printing to the console
+    int c;
+    FILE *file;
+    file = fopen("index.html", "r");
+    if (file) {
+        while  ((c = getc(file)) != EOF)
+            putchar(c);
+        fclose(file);
+    }
+
+
    bzero(buffer,256);
    n = read(sock,buffer,255);
+   if (n < 0) error("ERROR writing to socket");
 
-   if (n < 0) error("ERROR reading from socket");
    n = write(sock,"<b>",3);
 
-   if (n < 0) error("ERROR writing to socket");
    printf("Here is the message: %s\n",buffer);
 
    n = write(sock,"I got your message",18);
-   if (n < 0) error("ERROR writing to socket");
 
    n = write(sock,"</b>",4);
-   if (n < 0) error("ERROR writing to socket");
 }
