@@ -91,13 +91,50 @@ int main(int argc, char *argv[])
  *****************************************/
 void dostuff (int sock)
 {
-   int n;
-   char buffer[256];
-      
+    int n;
+    char buffer[512];
+    
+    //read in request
+    bzero(buffer,512);
+    n = read(sock,buffer,511);
+    if (n < 0) error("ERROR reading from socket");
+    
+    //tokenize request into headers
+    char *headers = NULL;
+    char *filename = NULL;
+    //find path of file requested
+    char *path = strstr(buffer, "GET /");
+    char *httpLoc = strstr(buffer, " HTTP");
+    if(path && httpLoc)
+    {
+        printf("Found GET / and HTTP\n");    
+        path += 5;
+        char *end = path;
+       // printf("String: %s\n", end);
+        while(strncmp(end," ",1))
+        {
+            end++;
+        }
+        printf("Size of filename: %d\n",end-path);
+
+        filename = (char*)malloc((end - path)*sizeof(char));
+        strncpy(filename, path, end-path);
+        printf("\nFilename: %s\n", filename);
+    }
+        
+    headers = strtok(buffer, "\n");
+    while(headers){
+        printf("Current header: %s\n",headers);
+        
+        //get next header
+        headers = strtok(NULL, "\n");
+    }        
+    
+    
     // Try reading from a file and printing to the console
     int c;
     FILE *file;
-    file = fopen("index.html", "r");
+    file = fopen(filename, "r");
 
     char* response;
     int filelength;
@@ -119,23 +156,19 @@ void dostuff (int sock)
             ++i;
         }
 
-        printf("\nTHE HTML:\n%s", response);
-        puts(response);
+        //printf("\nTHE HTML:\n%s", response);
+        //puts(response);
 
         fclose(file);
     }
     else {
-        // what 
+        // 404
+        bzero(response, filelength);
     }
-
-   bzero(buffer,256);
-   n = read(sock,buffer,255);
-   if (n < 0) error("ERROR reading from socket");
-
+   
     n = write(sock, response, filelength);
     if (n < 0) error("ERROR writing to socket");
     printf("write() returned %i\n", n);
 
-   printf("Here is the message: %s\n",buffer);
-
+    //printf("Here is the message: %s\n",buffer);
 }
