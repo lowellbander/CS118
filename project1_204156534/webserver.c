@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 void dostuff (int sock)
 {
    int n;
-   char buffer[256];
+   char buffer[512];
       
     // Try reading from a file and printing to the console
     int c;
@@ -119,23 +119,30 @@ void dostuff (int sock)
             ++i;
         }
 
-        printf("\nTHE HTML:\n%s", response);
-        puts(response);
+        //printf("\nTHE HTML:\n%s", response);
+        //puts(response);
 
         fclose(file);
     }
     else {
         // what 
     }
-
-   bzero(buffer,256);
-   n = read(sock,buffer,255);
-   if (n < 0) error("ERROR reading from socket");
+   
+    bzero(buffer,512);
+    n = read(sock,buffer,511);
+    if (n < 0) error("ERROR reading from socket");
+    
+    //splitting request into headers
+    char *headers = NULL;
+    headers = strtok(buffer, "\n");
+    while(headers){
+        printf("Current header: %s\n",headers);
+        headers = strtok(NULL, "\n");
+    }        
 
     n = write(sock, response, filelength);
     if (n < 0) error("ERROR writing to socket");
     printf("write() returned %i\n", n);
 
-   printf("Here is the message: %s\n",buffer);
-
+    //printf("Here is the message: %s\n",buffer);
 }
