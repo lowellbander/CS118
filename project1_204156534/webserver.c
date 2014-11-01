@@ -103,7 +103,8 @@ void dostuff (int sock)
     //tokenize request into headers
     char *headers = NULL;
     char *filename = NULL;
-    //find path of file requested
+    char *fileExtension = NULL;
+   //find path of file requested
     char *path = strstr(buffer, "GET /");
     char *httpLoc = strstr(buffer, " HTTP");
     if(path && httpLoc)
@@ -121,6 +122,23 @@ void dostuff (int sock)
         filename = (char*)malloc((end - path)*sizeof(char));
         strncpy(filename, path, end-path);
         //printf("\nFilename: %s\n", filename);
+    }
+    else
+    {
+        //handle case when GET or HTTP is not found. Probably corrupt request
+    }
+
+    //Find file extension to make mime/type
+    char *extLoc = strstr(filename, ".");
+    if(extLoc)
+    {
+        extLoc += 1;
+       // fileExtension = filename.substr(extLoc);
+       // printf("File extension is %s \n", fileExtension);
+    }
+    else
+    {
+        //No extension?
     }
         
     headers = strtok(buffer, "\n");
@@ -141,7 +159,9 @@ void dostuff (int sock)
 
     char* response;
     int response_length;
+    char *responseHeaders = NULL;
 
+    responseHeaders = strtok(buffer, " ");
     if (file) {
         
         // get the size of the file so we can copy it into a string
@@ -166,6 +186,7 @@ void dostuff (int sock)
         fclose(file);
     }
     else {
+        responseHeaders = "";
         // return 404 if the file doesn't exist
         response = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
         response_length = strlen(response);
