@@ -86,6 +86,23 @@ int main(int argc, char *argv[])
      return 0; /* we never get here */
 }
 
+/* append() 
+ *
+ * Takes a destination string, a source string, appends them, and returns the
+ * result. Returns NULL on failure.
+ * */
+char *append(char *dest, char *src) {
+    char* result = dest;
+    result = realloc(dest, strlen(dest) + strlen(src));
+    if (!result) {
+        printf("REALLOC FAILED\n");
+        return NULL;
+    } else {
+        result = strcat(result, src);
+        return result;
+    }
+}
+
 /******** DOSTUFF() *********************
  There is a separate instance of this function 
  for each connection.  It handles all communication
@@ -95,7 +112,7 @@ void dostuff (int sock)
 {
     int n;
     char buffer[512];
-    char *response = "";
+    char *response = (char*) malloc(0);
  
     //read in request and print it to the console
     bzero(buffer,512);
@@ -207,10 +224,13 @@ void dostuff (int sock)
     char *responseHeaders = NULL;
 
     responseHeaders = strtok(buffer, " ");
-    char *statusHeader = "";
+
+    char *statusHeader;
 
     if (file) {
         
+        statusHeader = "HTTP/1.1 200 OK\n";
+
         // get the size of the file so we can copy it into a string
         fseek(file, 0L, SEEK_END);
         file_len = ftell(file);
@@ -234,6 +254,9 @@ void dostuff (int sock)
 
     }
     else {
+        
+        statusHeader = "HTTP/1.1 404 Not Found\n";
+
         responseHeaders = "";
         // return 404 if the file doesn't exist
         body = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
@@ -267,13 +290,16 @@ void dostuff (int sock)
     //    "Connection: close\n"
     //    "\n"
     //    "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
-
-     //n = write(sock, reply, strlen(reply));
-     //if (n < 0) error("ERROR writing to socket");
-
+     
+    // build the response
+    response = append(response, statusHeader);
+    response = append(response, "\n");
+    response = append(response, body);
 
     // return the request file to the client, or a 404 if it doesn't exist
-     n = write(sock, body, file_len);
-     if (n < 0) error("ERROR writing to socket");
+    printf("writing to socket: \n%s", response);
+    // sometimes garbage is at the end, so the magic number gets rid of that
+    n = write(sock, response, strlen(response) - 3); 
+    if (n < 0) error("ERROR writing to socket");
 
 }
