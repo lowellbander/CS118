@@ -11,7 +11,9 @@
 #include <strings.h>
 #include <sys/wait.h>	/* for the waitpid() system call */
 #include <signal.h>	/* signal name macros, and the kill() prototype */
-
+#include <time.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 void sigchld_handler(int s)
 {
@@ -99,12 +101,12 @@ void dostuff (int sock)
     bzero(buffer,512);
     n = read(sock,buffer,511);
     if (n < 0) error("ERROR reading from socket");
-    else printf("\n%s\n",buffer);
+    else printf("\nno error!\n%s\n",buffer);
     
     //tokenize request into headers
     char *headers = NULL;
     char *filename = NULL;
-    char *fileExtension = NULL;
+    char *fileExt = NULL;
     
     //find path of file requested
     char *path = strstr(buffer, "GET /");
@@ -122,59 +124,67 @@ void dostuff (int sock)
         //printf("Size of filename: %d\n",end-path);
 
         filename = (char*)malloc((end - path)*sizeof(char));
-        strncpy(filename, path, end-path);
-        //printf("\nFilename: %s\n", filename);
+        if(filename){
+            strncpy(filename, path, end-path);
+       		// printf("\nFilename: %s\n", filename);
+           	//Find file extension to make mime/type
+		    fileExt = strstr(filename, ".");
+		    if(fileExt)
+		    {
+		        fileExt += 1;
+		        size_t num = filename - fileExt;
+		        //printf("fileExtension : %s\n",fileExt);
+
+		        //conditionally determine mimeType    
+			    char *mimeType = NULL;
+			    if(!strcmp(fileExt, "html"))
+			    { 
+			        mimeType="text/html";
+			    }
+			    else if(!strcmp(fileExt, "txt"))
+			    {
+			        mimeType="text/plain";
+			    }
+			    else if((!strcmp(fileExt, "jpg")) || (!strcmp(fileExt,"jpeg"))  )
+			    {
+			        mimeType="image/jpeg";
+			    }
+			    //add bmp, gif, png and binarY    
+			    else if(!strcmp(fileExt, "bmp")) 
+			    {
+			        mimeType="image/bmp";
+			    }
+			    else if(!strcmp(fileExt, "png"))
+			    {
+			        mimeType="image/png";
+			    }
+			    else if(!strcmp(fileExt, "gif"))
+			    {
+			        mimeType="image/gif";
+			    }
+			    else
+			    {
+			        mimeType="application/octet-stream";
+			    }
+			    printf("mimeType : %s\n",mimeType);
+		    }
+		    else
+		    {
+		        
+		        //TODO: No extension?
+		    }
+		    
+		    
+        }
+        else{
+        	//TODO: no file? serve index.html?
+        }
+    
     }
     else
     {
         //handle case when GET or HTTP is not found. Probably corrupt request
     }
-
-    //Find file extension to make mime/type
-    char *fileExt = strstr(filename, ".");
-    if(fileExt)
-    {
-        fileExt += 1;
-        size_t num = filename - fileExt;
-        //printf("After . : %s\n",fileExt);
-    }
-    else
-    {
-        
-        //No extension?
-    }
-    //conditionally determine mimeType    
-    char *mimeType = NULL;
-    if(!strcmp(fileExt, "html"))
-    { 
-        mimeType="text/html";
-    }
-    else if(!strcmp(fileExt, "txt"))
-    {
-        mimeType="text/plain";
-    }
-    else if((!strcmp(fileExt, "jpg")) || (!strcmp(fileExt,"jpeg"))  )
-    {
-        mimeType="image/jpeg";
-    }
-    //add bmp, gif, png and binarY    
-    else if(!strcmp(fileExt, "bmp")) 
-    {
-        mimeType="image/bmp";
-    }
-    else if(!strcmp(fileExt, "png"))
-    {
-        mimeType="image/png";
-    }
-    else if(!strcmp(fileExt, "gif"))
-    {
-        mimeType="image/gif";
-    }
-    else
-    {
-        mimeType="application/octet-stream";
-    }
-
     
     headers = strtok(buffer, "\n");
     while(headers){
@@ -197,7 +207,7 @@ void dostuff (int sock)
     char *responseHeaders = NULL;
 
     responseHeaders = strtok(buffer, " ");
-    char *statusHeader = "HTTP/1.1 200 OK\n";
+    char *statusHeader = "";
 
     if (file) {
         
@@ -217,17 +227,37 @@ void dostuff (int sock)
             ++i;
         }
 
+            char tbuffer [80];
+
         fclose(file);
+        statusHeader = "HTTP/1.1 200 OK\n";
+
     }
     else {
         responseHeaders = "";
         // return 404 if the file doesn't exist
         body = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
+        statusHeader = "HTTP/1.1 404 Not Found\n";
     }
-   
+    printf("Status Header: %s\n",statusHeader);
+
+    char *dateHeader = "";
+    time_t rawtime;
+    struct tm * timeinfo;
+    char tbuffer [80];
+    time (&rawtime);
+    timeinfo = gmtime (&rawtime);
+    strftime (tbuffer,80,"Date: %a, %d %b %G %T GMT\n",timeinfo);
+    dateHeader = tbuffer;
+
+    char *serverHeader = "Server: BBServer/2.0\n";
+
+    char *lastModifiedHeader = "Last-Modified: Wed, 18 Feb 2004 13:21:45 GMT\n";
+    
+    
     //char *reply = 
-    //    "HTTP/1.1 200 OK\n"
-    //    "Date: Thu, 19 Feb 2009 12:27:04 GMT\n"
+    //    "HTTP/1.1 200 OK\n" done
+    //    "Date: Thu, 19 Feb 2009 12:27:04 GMT\n" done
     //    "Server: Apache/2.2.3\n"
     //    "Last-Modified: Wed, 18 Jun 2003 16:05:58 GMT\n"
     //    "ETag: \"56d-9989200-1132c580\"\n"
