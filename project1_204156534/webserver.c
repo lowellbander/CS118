@@ -93,7 +93,7 @@ void dostuff (int sock)
 {
     int n;
     char buffer[512];
-    char *response = "";
+    char *response = (char*) malloc(0);
  
     //read in request and print it to the console
     bzero(buffer,512);
@@ -174,7 +174,6 @@ void dostuff (int sock)
     {
         mimeType="application/octet-stream";
     }
-
     
     headers = strtok(buffer, "\n");
     while(headers){
@@ -243,11 +242,16 @@ void dostuff (int sock)
      //if (n < 0) error("ERROR writing to socket");
      
     // build the response
-    
-
+    response = realloc(response, strlen(response) + strlen(body));
+    if (!response) printf("REALLOC FAILED\n");
+    else printf("successful alloc\n");
+    response = strcat(response, body);
 
     // return the request file to the client, or a 404 if it doesn't exist
-     n = write(sock, body, file_len);
-     if (n < 0) error("ERROR writing to socket");
+    printf("hello\n");
+    printf("writing to socket: \n%s", response);
+    // sometimes garbage is at the end, so the magic number gets rid of that
+    n = write(sock, response, strlen(response) - 3); 
+    if (n < 0) error("ERROR writing to socket");
 
 }
