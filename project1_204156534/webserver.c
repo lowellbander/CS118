@@ -84,6 +84,23 @@ int main(int argc, char *argv[])
      return 0; /* we never get here */
 }
 
+/* append() 
+ *
+ * Takes a destination string, a source string, appends them, and returns the
+ * result. Returns NULL on failure.
+ * */
+char *append(char *dest, char *src) {
+    char* result = dest;
+    result = realloc(dest, strlen(dest) + strlen(src));
+    if (!result) {
+        printf("REALLOC FAILED\n");
+        return NULL;
+    } else {
+        result = strcat(result, src);
+        return result;
+    }
+}
+
 /******** DOSTUFF() *********************
  There is a separate instance of this function 
  for each connection.  It handles all communication
@@ -237,26 +254,11 @@ void dostuff (int sock)
     //    "Connection: close\n"
     //    "\n"
     //    "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
-
-     //n = write(sock, reply, strlen(reply));
-     //if (n < 0) error("ERROR writing to socket");
      
-    // TODO: make a function that does both realloc() and strcat()
     // build the response
-    response = realloc(response, strlen(response) + strlen(statusHeader));
-    if (!response) printf("REALLOC FAILED\n");
-    else printf("successful alloc\n");
-    response = strcat(response, statusHeader);
-
-    response = realloc(response, strlen(response) + 1);
-    if (!response) printf("REALLOC FAILED\n");
-    else printf("successful alloc\n");
-    response = strcat(response, "\n");
-
-    response = realloc(response, strlen(response) + strlen(body));
-    if (!response) printf("REALLOC FAILED\n");
-    else printf("successful alloc\n");
-    response = strcat(response, body);
+    response = append(response, statusHeader);
+    response = append(response, "\n");
+    response = append(response, body);
 
     // return the request file to the client, or a 404 if it doesn't exist
     printf("writing to socket: \n%s", response);
