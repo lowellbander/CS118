@@ -93,8 +93,8 @@ void dostuff (int sock)
 {
     int n;
     char buffer[512];
-    char* response = "";
-    
+    char *response = "";
+ 
     //read in request and print it to the console
     bzero(buffer,512);
     n = read(sock,buffer,511);
@@ -105,7 +105,8 @@ void dostuff (int sock)
     char *headers = NULL;
     char *filename = NULL;
     char *fileExtension = NULL;
-   //find path of file requested
+    
+    //find path of file requested
     char *path = strstr(buffer, "GET /");
     char *httpLoc = strstr(buffer, " HTTP");
     if(path && httpLoc)
@@ -130,19 +131,51 @@ void dostuff (int sock)
     }
 
     //Find file extension to make mime/type
-    char *extLoc = strstr(filename, ".");
-    if(extLoc)
+    char *fileExt = strstr(filename, ".");
+    if(fileExt)
     {
-        extLoc += 1;
-        size_t num = filename - extLoc;
-        //printf("After . : %s\n",extLoc);
+        fileExt += 1;
+        size_t num = filename - fileExt;
+        //printf("After . : %s\n",fileExt);
     }
     else
     {
         
         //No extension?
     }
-        
+    //conditionally determine mimeType    
+    char *mimeType = NULL;
+    if(!strcmp(fileExt, "html"))
+    { 
+        mimeType="text/html";
+    }
+    else if(!strcmp(fileExt, "txt"))
+    {
+        mimeType="text/plain";
+    }
+    else if((!strcmp(fileExt, "jpg")) || (!strcmp(fileExt,"jpeg"))  )
+    {
+        mimeType="image/jpeg";
+    }
+    //add bmp, gif, png and binarY    
+    else if(!strcmp(fileExt, "bmp")) 
+    {
+        mimeType="image/bmp";
+    }
+    else if(!strcmp(fileExt, "png"))
+    {
+        mimeType="image/png";
+    }
+    else if(!strcmp(fileExt, "gif"))
+    {
+        mimeType="image/gif";
+    }
+    else
+    {
+        mimeType="application/octet-stream";
+    }
+
+    
     headers = strtok(buffer, "\n");
     while(headers){
         //printf("Current header: %s\n",headers);
@@ -151,38 +184,7 @@ void dostuff (int sock)
         headers = strtok(NULL, "\n");
     }        
     
-    //construct response header
-    char *contentType = NULL;
-    if(!strcmp(extLoc, "html"))
-    { 
-        contentType="text/html";
-    }
-    else if(!strcmp(extLoc, "txt"))
-    {
-        contentType="text/plain";
-    }
-    else if((!strcmp(extLoc, "jpg")) || (!strcmp(extLoc,"jpeg"))  )
-    {
-        contentType="image/jpeg";
-    }
-    //add bmp, gif, png and binarY    
-    else if(!strcmp(extLoc, "bmp")) 
-    {
-        contentType="image/bmp";
-    }
-    else if(!strcmp(extLoc, "png"))
-    {
-        contentType="image/png";
-    }
-    else if(!strcmp(extLoc, "gif"))
-    {
-        contentType="image/gif";
-    }
-    else
-    {
-        contentType="application/octet-stream";
-    }
-    //printf("Content-type: %s\n",contentType);    
+    //printf("Content-type: %s\n",mimeType);    
     // Try reading from a file and printing to the console
     int c;
     FILE *file;
@@ -196,7 +198,7 @@ void dostuff (int sock)
 
     responseHeaders = strtok(buffer, " ");
 
-    char* status_header = "HTTP/1.1 200 OK\n";
+    char *statusHeader = "HTTP/1.1 200 OK\n";
 
     if (file) {
         
