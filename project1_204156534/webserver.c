@@ -214,10 +214,12 @@ void dostuff (int sock)
 
     responseHeaders = strtok(buffer, " ");
 
-    char *statusHeader = "HTTP/1.1 200 OK\n";
+    char *statusHeader;
 
     if (file) {
         
+        statusHeader = "HTTP/1.1 200 OK\n";
+
         // get the size of the file so we can copy it into a string
         fseek(file, 0L, SEEK_END);
         file_len = ftell(file);
@@ -237,6 +239,9 @@ void dostuff (int sock)
         fclose(file);
     }
     else {
+        
+        statusHeader = "HTTP/1.1 404 Not Found\n";
+
         responseHeaders = "";
         // return 404 if the file doesn't exist
         body = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
