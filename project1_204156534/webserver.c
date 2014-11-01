@@ -93,6 +93,7 @@ void dostuff (int sock)
 {
     int n;
     char buffer[512];
+    char* response = "";
     
     //read in request and print it to the console
     bzero(buffer,512);
@@ -194,6 +195,9 @@ void dostuff (int sock)
     char *responseHeaders = NULL;
 
     responseHeaders = strtok(buffer, " ");
+
+    char* status_header = "HTTP/1.1 200 OK\n";
+
     if (file) {
         
         // get the size of the file so we can copy it into a string
@@ -235,6 +239,9 @@ void dostuff (int sock)
 
      //n = write(sock, reply, strlen(reply));
      //if (n < 0) error("ERROR writing to socket");
+     
+    // build the response
+    
 
 
     // return the request file to the client, or a 404 if it doesn't exist
