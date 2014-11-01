@@ -133,8 +133,8 @@ void dostuff (int sock)
     if(extLoc)
     {
         extLoc += 1;
-       // fileExtension = filename.substr(extLoc);
-       // printf("File extension is %s \n", fileExtension);
+        size_t num = filename - extLoc;
+        printf("After . : %s\n",extLoc);
     }
     else
     {
