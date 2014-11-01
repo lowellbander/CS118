@@ -189,8 +189,8 @@ void dostuff (int sock)
     // open the file for reading
     file = fopen(filename, "r");
 
-    char* response;
-    int response_length;
+    char* body;
+    int file_len;
     char *responseHeaders = NULL;
 
     responseHeaders = strtok(buffer, " ");
@@ -198,30 +198,26 @@ void dostuff (int sock)
         
         // get the size of the file so we can copy it into a string
         fseek(file, 0L, SEEK_END);
-        response_length = ftell(file);
+        file_len = ftell(file);
         // seek back to the beginning
         fseek(file, 0L, SEEK_SET);
 
-        //printf("\nFILE SIZE: %i\n", response_length);
-        response = (char*) malloc(response_length*sizeof(char));
+        //printf("\nFILE SIZE: %i\n", file_len);
+        body = (char*) malloc(file_len*sizeof(char));
 
         // copy the requested file to a local buffer
         int i = 0;
         while  ((c = getc(file)) != EOF) {
-            response[i] = c;
+            body[i] = c;
             ++i;
         }
-
-        //printf("\nTHE HTML:\n%s", response);
-        //puts(response);
 
         fclose(file);
     }
     else {
         responseHeaders = "";
         // return 404 if the file doesn't exist
-        response = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
-        response_length = strlen(response);
+        body = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
     }
    
     //char *reply = 
@@ -237,12 +233,12 @@ void dostuff (int sock)
     //    "\n"
     //    "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
 
-     n = write(sock, reply, strlen(reply));
-     if (n < 0) error("ERROR writing to socket");
+     //n = write(sock, reply, strlen(reply));
+     //if (n < 0) error("ERROR writing to socket");
 
 
     // return the request file to the client, or a 404 if it doesn't exist
-    // n = write(sock, response, response_length);
-    // if (n < 0) error("ERROR writing to socket");
+     n = write(sock, body, file_len);
+     if (n < 0) error("ERROR writing to socket");
 
 }
