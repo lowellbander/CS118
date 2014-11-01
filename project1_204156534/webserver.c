@@ -94,7 +94,7 @@ void dostuff (int sock)
     int n;
     char buffer[512];
     
-    //read in request
+    //read in request and print it to the console
     bzero(buffer,512);
     n = read(sock,buffer,511);
     if (n < 0) error("ERROR reading from socket");
@@ -135,6 +135,8 @@ void dostuff (int sock)
     // Try reading from a file and printing to the console
     int c;
     FILE *file;
+
+    // open the file for reading
     file = fopen(filename, "r");
 
     char* response;
@@ -151,6 +153,7 @@ void dostuff (int sock)
         //printf("\nFILE SIZE: %i\n", response_length);
         response = (char*) malloc(response_length*sizeof(char));
 
+        // copy the requested file to a local buffer
         int i = 0;
         while  ((c = getc(file)) != EOF) {
             response[i] = c;
@@ -163,18 +166,15 @@ void dostuff (int sock)
         fclose(file);
     }
     else {
-        // 404
-        //bzero(response, response_length);
-        //printf("returning 404");
+        // return 404 if the file doesn't exist
         response = "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
         response_length = strlen(response);
     }
    
     //printf("\nresponse:\n%s\n", response);
 
+    // return the request file to the client, or a 404 if it doesn't exist
     n = write(sock, response, response_length);
     if (n < 0) error("ERROR writing to socket");
-    //printf("write() returned %i\n", n);
 
-    //printf("Here is the message: %s\n",buffer);
 }
