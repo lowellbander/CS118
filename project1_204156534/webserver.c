@@ -151,37 +151,37 @@ void dostuff (int sock)
     }        
     
     //construct response header
-    char *content-type = NULL;
+    char *contentType = NULL;
     if(!strcmp(extLoc, "html"))
     { 
-        content-type="text/html";
+        contentType="text/html";
     }
     else if(!strcmp(extLoc, "txt"))
     {
-        content-type="text/plain";
+        contentType="text/plain";
     }
     else if((!strcmp(extLoc, "jpg")) || (!strcmp(extLoc,"jpeg"))  )
     {
-        content-type="image/jpeg";
+        contentType="image/jpeg";
     }
     //add bmp, gif, png and binarY    
     else if(!strcmp(extLoc, "bmp")) 
     {
-        content-type="image/bmp";
+        contentType="image/bmp";
     }
     else if(!strcmp(extLoc, "png"))
     {
-        content-type="image/png";
+        contentType="image/png";
     }
     else if(!strcmp(extLoc, "gif"))
     {
-        content-type="image/gif";
+        contentType="image/gif";
     }
     else
     {
-        content-type="application/octet-stream";
+        contentType="application/octet-stream";
     }
-    
+    //printf("Content-type: %s\n",contentType);    
     // Try reading from a file and printing to the console
     int c;
     FILE *file;
