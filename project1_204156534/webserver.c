@@ -133,11 +133,12 @@ void dostuff (int sock)
     if(extLoc)
     {
         extLoc += 1;
-       // fileExtension = filename.substr(extLoc);
-       // printf("File extension is %s \n", fileExtension);
+        size_t num = filename - extLoc;
+        //printf("After . : %s\n",extLoc);
     }
     else
     {
+        
         //No extension?
     }
         
@@ -149,6 +150,37 @@ void dostuff (int sock)
         headers = strtok(NULL, "\n");
     }        
     
+    //construct response header
+    char *content-type = NULL;
+    if(!strcmp(extLoc, "html"))
+    { 
+        content-type="text/html";
+    }
+    else if(!strcmp(extLoc, "txt"))
+    {
+        content-type="text/plain";
+    }
+    else if((!strcmp(extLoc, "jpg")) || (!strcmp(extLoc,"jpeg"))  )
+    {
+        content-type="image/jpeg";
+    }
+    //add bmp, gif, png and binarY    
+    else if(!strcmp(extLoc, "bmp")) 
+    {
+        content-type="image/bmp";
+    }
+    else if(!strcmp(extLoc, "png"))
+    {
+        content-type="image/png";
+    }
+    else if(!strcmp(extLoc, "gif"))
+    {
+        content-type="image/gif";
+    }
+    else
+    {
+        content-type="application/octet-stream";
+    }
     
     // Try reading from a file and printing to the console
     int c;
