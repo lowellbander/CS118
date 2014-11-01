@@ -224,10 +224,25 @@ void dostuff (int sock)
         response_length = strlen(response);
     }
    
-    //printf("\nresponse:\n%s\n", response);
+    //char *reply = 
+    //    "HTTP/1.1 200 OK\n"
+    //    "Date: Thu, 19 Feb 2009 12:27:04 GMT\n"
+    //    "Server: Apache/2.2.3\n"
+    //    "Last-Modified: Wed, 18 Jun 2003 16:05:58 GMT\n"
+    //    "ETag: \"56d-9989200-1132c580\"\n"
+    //    "Content-Type: text/html\n"
+    //    "Content-Length: 15\n"
+    //    "Accept-Ranges: bytes\n"
+    //    "Connection: close\n"
+    //    "\n"
+    //    "<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
+
+     n = write(sock, reply, strlen(reply));
+     if (n < 0) error("ERROR writing to socket");
+
 
     // return the request file to the client, or a 404 if it doesn't exist
-    n = write(sock, response, response_length);
-    if (n < 0) error("ERROR writing to socket");
+    // n = write(sock, response, response_length);
+    // if (n < 0) error("ERROR writing to socket");
 
 }
