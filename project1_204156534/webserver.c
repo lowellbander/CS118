@@ -241,14 +241,24 @@ void dostuff (int sock)
      //n = write(sock, reply, strlen(reply));
      //if (n < 0) error("ERROR writing to socket");
      
+    // TODO: make a function that does both realloc() and strcat()
     // build the response
+    response = realloc(response, strlen(response) + strlen(statusHeader));
+    if (!response) printf("REALLOC FAILED\n");
+    else printf("successful alloc\n");
+    response = strcat(response, statusHeader);
+
+    response = realloc(response, strlen(response) + 1);
+    if (!response) printf("REALLOC FAILED\n");
+    else printf("successful alloc\n");
+    response = strcat(response, "\n");
+
     response = realloc(response, strlen(response) + strlen(body));
     if (!response) printf("REALLOC FAILED\n");
     else printf("successful alloc\n");
     response = strcat(response, body);
 
     // return the request file to the client, or a 404 if it doesn't exist
-    printf("hello\n");
     printf("writing to socket: \n%s", response);
     // sometimes garbage is at the end, so the magic number gets rid of that
     n = write(sock, response, strlen(response) - 3); 
