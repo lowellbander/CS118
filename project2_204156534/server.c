@@ -61,14 +61,7 @@ int main(int argc, char* argv[]) {
     return 1;
     }
 
-    /* read a file into memory */
-    //char* filename = "textfile.txt";
-    //char* contents = readfile(filename);
-
     while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
-        //fflush(stdout);
-        //write(1, buffer, message_length);   //??
-        //write(1, "\n", 1);                  //??
         
         int filenamelength = strlen(buffer) - 2;
         char filename[filenamelength];
@@ -78,9 +71,6 @@ int main(int argc, char* argv[]) {
         char* requested_file = readfile(filename);
 
         sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
-
-        /* echo back to client */
-        //sendto(sock, buffer, message_length, 0, (struct sockaddr *) &other, len);
     }
 
     close(sock);
