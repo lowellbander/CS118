@@ -13,3 +13,6 @@ client
 *.swp
 *.png
 *.zip
+
+sender
+receiver
