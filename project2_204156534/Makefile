@@ -1,13 +1,19 @@
 CC=gcc
 CFLAGS=-Wall
 
-all: server client
+all: client server
+	
+client: client.o
+	g++ client.o -o client
 
-server: 
-	$(CC) server.c -o server
+server: server.o
+	g++ server.o -o server
 
-client: 
-	$(CC) client.c -o client
+server.o: server.c
+	$(CC) -c server.c 
+
+client.o: client.c 
+	$(CC) -c client.c
 
 clean:
 	rm -rf server client
