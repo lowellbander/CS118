@@ -10,10 +10,10 @@
 #define BUF_SIZE 1024
 
 int main(int argc, char* argv[]) {
-    char buf[BUF_SIZE];
+    char buffer[BUF_SIZE];
     struct sockaddr_in self, other;
     int len = sizeof(struct sockaddr_in);
-    int n, s, port;
+    int message_length, sock, port;
 
     if (argc < 2) {
     fprintf(stderr, "Usage: %s <port>\n", argv[0]);
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     }
 
     /* initialize socket */
-    if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+    if ((sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
     perror("socket");
     return 1;
     }
@@ -32,23 +32,21 @@ int main(int argc, char* argv[]) {
     self.sin_family = AF_INET;
     self.sin_port = htons(port);
     self.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (bind(s, (struct sockaddr *) &self, sizeof(self)) == -1) {
+    if (bind(sock, (struct sockaddr *) &self, sizeof(self)) == -1) {
     perror("bind");
     return 1;
     }
 
-    while ((n = recvfrom(s, buf, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
-    printf("Received from %s:%d: ", 
-        inet_ntoa(other.sin_addr), 
-        ntohs(other.sin_port)); 
-    fflush(stdout);
-    write(1, buf, n);
-    write(1, "\n", 1);
+    while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
+        printf("Received from %s:%d: ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
+        fflush(stdout);
+        write(1, buffer, message_length);
+        write(1, "\n", 1);
 
-    /* echo back to client */
-    sendto(s, buf, n, 0, (struct sockaddr *) &other, len);
+        /* echo back to client */
+        sendto(sock, buffer, message_length, 0, (struct sockaddr *) &other, len);
     }
 
-    close(s);
+    close(sock);
     return 0;
 }
