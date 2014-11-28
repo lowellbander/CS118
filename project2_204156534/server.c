@@ -62,17 +62,25 @@ int main(int argc, char* argv[]) {
     }
 
     /* read a file into memory */
-    char* filename = "textfile.txt";
-    char* contents = readfile(filename);
+    //char* filename = "textfile.txt";
+    //char* contents = readfile(filename);
 
     while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
-        printf("Received from %s:%d: ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
-        fflush(stdout);
-        write(1, buffer, message_length);
-        write(1, "\n", 1);
+        //fflush(stdout);
+        //write(1, buffer, message_length);   //??
+        //write(1, "\n", 1);                  //??
+        
+        int filenamelength = strlen(buffer) - 2;
+        char filename[filenamelength];
+        memcpy(filename, &buffer, filenamelength);
+        printf("Requested file from %s:%d: ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
+        printf("'%s'\n", filename);
+        char* requested_file = readfile(filename);
+
+        sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
 
         /* echo back to client */
-        sendto(sock, buffer, message_length, 0, (struct sockaddr *) &other, len);
+        //sendto(sock, buffer, message_length, 0, (struct sockaddr *) &other, len);
     }
 
     close(sock);

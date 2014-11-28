@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     port = atoi(argv[2]);
 
     /* initialize socket */
-    if ((sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+    if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
         perror("socket");
         return 1;
     }
@@ -42,11 +42,15 @@ int main(int argc, char *argv[]) {
     server.sin_port = htons(port);
     server.sin_addr = *((struct in_addr*) host->h_addr);
 
+    char* message = "textfile.txt";
+    // message = argv[3];
+
     /* send message */
-    if (sendto(sock, argv[3], strlen(argv[3]), 0, (struct sockaddr *) &server, len) == -1) {
+    if (sendto(sock, message, strlen(message), 0, (struct sockaddr *) &server, len) == -1) {
         perror("sendto()");
         return 1;
     }
+    printf("requesting file: '%s'\n", message);
 
     /* receive echo.
     ** for single message, "while" is not necessary. But it allows the client 
@@ -54,7 +58,7 @@ int main(int argc, char *argv[]) {
     ** receive message sent from any endpoint.
     */
     while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
-        printf("Received from %s:%d: ",  inet_ntoa(server.sin_addr), ntohs(server.sin_port)); 
+        printf("Received from %s:%d: \n",  inet_ntoa(server.sin_addr), ntohs(server.sin_port)); 
         fflush(stdout);
         write(1, buffer, message_length);
         write(1, "\n", 1);
