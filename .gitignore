@@ -9,10 +9,9 @@
 *.o
 webserver
 client
+server
 
 *.swp
 *.png
 *.zip
 
-sender
-receiver
