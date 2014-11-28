@@ -9,9 +9,7 @@
 
 #define BUF_SIZE 1024
 
-typedef enum {false, true} bool; //allows for use of bools
-
-char* readfile(char* filename, bool showContents) {
+char* readfile(char* filename) {
     FILE* f = fopen(filename, "r");
     if (f == NULL) {
         perror("failed to open file\n");
@@ -31,9 +29,6 @@ char* readfile(char* filename, bool showContents) {
 
     fread(contents, sizeof(char), nBytes, f);
     fclose(f);
-
-    if (showContents) 
-        printf("Contents of '%s':\n%s\n", filename, contents);
 
     return contents;
 }
@@ -68,7 +63,7 @@ int main(int argc, char* argv[]) {
 
     /* read a file into memory */
     char* filename = "textfile.txt";
-    char* contents = readfile(filename, true);
+    char* contents = readfile(filename);
 
     while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
         printf("Received from %s:%d: ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
