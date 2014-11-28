@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     int message_length, sock, port;
 
     if (argc < 4) {
-        fprintf(stderr, "Usage: %s <host> <port> <message>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <host> <port> <filename>\n", argv[0]);
         return 1;
     }
 
@@ -42,15 +42,14 @@ int main(int argc, char *argv[]) {
     server.sin_port = htons(port);
     server.sin_addr = *((struct in_addr*) host->h_addr);
 
-    char* message = "textfile.txt";
-    // message = argv[3];
+    char* filename = argv[3];
 
-    /* send message */
-    if (sendto(sock, message, strlen(message), 0, (struct sockaddr *) &server, len) == -1) {
+    /* send filename */
+    if (sendto(sock, filename, strlen(filename), 0, (struct sockaddr *) &server, len) == -1) {
         perror("sendto()");
         return 1;
     }
-    printf("requesting file: '%s'\n", message);
+    printf("requesting file: '%s'\n", filename);
 
     /* receive echo.
     ** for single message, "while" is not necessary. But it allows the client 
