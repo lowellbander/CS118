@@ -1,10 +1,13 @@
-CC=g++
+CC=gcc
 CFLAGS=-Wall
 
-all: sender receiver
+all: server client
 
-sender: 
-	$(CC) sender.cpp -o sender
+server: 
+	$(CC) server.c -o server
 
-receiver: 
-	$(CC) receiver.cpp -o receiver
+client: 
+	$(CC) client.c -o client
+
+clean:
+	rm -rf server client
