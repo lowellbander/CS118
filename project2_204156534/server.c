@@ -40,14 +40,14 @@ int main(int argc, char* argv[]) {
     int message_length, sock, port;
 
     if (argc < 2) {
-    fprintf(stderr, "Usage: %s <port>\n", argv[0]);
-    return 1;
+        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
+        return 1;
     }
 
     /* initialize socket */
     if ((sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-    perror("socket");
-    return 1;
+        perror("socket");
+        return 1;
     }
 
     /* bind to server port */
@@ -57,8 +57,8 @@ int main(int argc, char* argv[]) {
     self.sin_port = htons(port);
     self.sin_addr.s_addr = htonl(INADDR_ANY);
     if (bind(sock, (struct sockaddr *) &self, sizeof(self)) == -1) {
-    perror("bind");
-    return 1;
+        perror("bind");
+        return 1;
     }
 
     memset(buffer, 0, BUF_SIZE);
