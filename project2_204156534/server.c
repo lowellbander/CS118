@@ -61,9 +61,10 @@ int main(int argc, char* argv[]) {
     return 1;
     }
 
+    memset(buffer, 0, BUF_SIZE);
     while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
         
-        int filenamelength = strlen(buffer) - 2;
+        int filenamelength = strlen(buffer);
         char filename[filenamelength];
         memcpy(filename, &buffer, filenamelength);
         printf("Requested file from %s:%d: ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
