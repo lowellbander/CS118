@@ -1,6 +1,6 @@
 //packet struct
 
-#DEFINE PAYLOAD_SIZE 800
+#define PAYLOAD_SIZE 800
 typedef enum {DATA, ACK, END} packetType;
 
 typedef struct{
