@@ -16,4 +16,4 @@ client.o: client.c
 	$(CC) -c client.c
 
 clean:
-	rm -rf server client
+	rm -rf server client *.o
