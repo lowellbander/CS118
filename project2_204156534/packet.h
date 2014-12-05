@@ -11,6 +11,10 @@ typedef struct{
 
 void print_packet(packet* packet_pointer) {
     printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
+    if(packet_pointer == NULL){
+        printf("Null packet pointer");
+        return;
+    }
     printf("printing packet information: \n");
     printf("Seq num: %lu\n", packet_pointer->seqnum);
     printf("Total size: %lu\n", packet_pointer->total_size);
