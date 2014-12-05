@@ -10,12 +10,10 @@
 #include <stdbool.h>
 #include "packet.h"
 
-#define BUF_SIZE 2048
-
 int main(int argc, char *argv[]) {
     struct sockaddr_in server;
     int len = sizeof(struct sockaddr_in);
-    char buffer[BUF_SIZE];
+    char buffer[PACKET_SIZE];
     struct hostent *host;
     int message_length, sock, port;
 
@@ -61,7 +59,7 @@ int main(int argc, char *argv[]) {
 
     while (true) {
         // wait until there is a packet in the buffer
-        if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
+        if ((message_length = recvfrom(sock, buffer, PACKET_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
 
             packet* packet_pointer = (packet*) buffer;
             printf("just received packet:\n");
