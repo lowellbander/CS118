@@ -69,9 +69,11 @@ int main(int argc, char *argv[]) {
         // wait until there is a packet in the buffer
         if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
             printf("message_length: %i\n", message_length);
-            //packet received_packet = *buffer;
+
             packet* packet_pointer = (packet*) buffer;
-            //printf
+            printf("Seq num: %lu\n", packet_pointer->seqnum);
+            printf("Total size: %lu\n", packet_pointer->total_size);
+            printf("Payload: %s\n", packet_pointer->payload);            
             //if (packet->)
         }
     }

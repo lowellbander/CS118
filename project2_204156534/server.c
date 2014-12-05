@@ -6,8 +6,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "packet.h"
 
 #define BUF_SIZE 1024
+#define PACKET_SIZE 1024
 
 char* readfile(char* filename) {
     FILE* f = fopen(filename, "r");
@@ -45,6 +47,7 @@ int main(int argc, char* argv[]) {
     }
 
     //use args
+    
     //timer setup
     //network to host byte order
 
@@ -73,9 +76,13 @@ int main(int argc, char* argv[]) {
         memcpy(filename, &buffer, filenamelength);
         printf("Requested file from %s:%d: ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
         printf("'%s'\n", filename);
-        char* requested_file = readfile(filename);
-
-        sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
+        //char* requested_file = readfile(filename);
+        packet test_packet;
+        test_packet.seqnum = 0;
+        test_packet.total_size = 500;
+        strcpy(test_packet.payload,"lo and behold");
+        sendto(sock, (char *)&test_packet, PACKET_SIZE, 0, (struct sockaddr*) &other, len);
+        //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
     }
 
     close(sock);
