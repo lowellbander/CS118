@@ -10,12 +10,10 @@
 #include <stdbool.h>
 #include "packet.h"
 
-#define BUF_SIZE 2048
-
 int main(int argc, char *argv[]) {
     struct sockaddr_in server;
     int len = sizeof(struct sockaddr_in);
-    char buffer[BUF_SIZE];
+    char buffer[PACKET_SIZE];
     struct hostent *host;
     int message_length, sock, port;
 
@@ -56,12 +54,12 @@ int main(int argc, char *argv[]) {
     // this will store all the packets that we receive
     packet* received_packets = NULL;
     unsigned long expected_sequence_number = 0;
+    unsigned total_size;
     int nReceivedPackets = 0;
 
     while (true) {
         // wait until there is a packet in the buffer
-        if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
-            //printf("message_length: %i\n", message_length);
+        if ((message_length = recvfrom(sock, buffer, PACKET_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
 
             packet* packet_pointer = (packet*) buffer;
             printf("just received packet:\n");
@@ -69,6 +67,7 @@ int main(int argc, char *argv[]) {
             
             // initialize received_packets if we have not yet done so.
             if (received_packets == NULL) {
+                total_size = packet_pointer->total_size;
                 int nPackets = ((packet_pointer->total_size)/PAYLOAD_SIZE)*sizeof(packet);
                 received_packets = (packet*)calloc(nPackets, sizeof(packet));
                 if (received_packets != NULL)
@@ -106,12 +105,21 @@ int main(int argc, char *argv[]) {
     }
     printf("\nDone. Received %i packets.\n", nReceivedPackets);
 
-    // TODO: write the received file to disk
-
     // print received_packets;
     int i;
     for (i = 0; i < nReceivedPackets; ++i)
         print_packet(&received_packets[i]);
+
+    // write the received file to disk
+    char file_contents[total_size + 1];
+    // copy contents from packets to our temporary buffer
+    for (i = 0; i < nReceivedPackets; ++i)
+        strcat(file_contents, received_packets[i].payload);
+    FILE* f = fopen("received.txt", "w");
+    if (f == NULL)
+        printf("failed to open file\n");
+    fwrite(file_contents, sizeof(char), total_size, f);
+    fclose(f);
 
     close(sock);
     return 0;

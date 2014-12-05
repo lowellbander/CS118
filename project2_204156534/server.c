@@ -10,9 +10,6 @@
 #include <time.h>
 #include "packet.h"
 
-#define BUF_SIZE 1024
-#define PACKET_SIZE 1024
-
 char* readfile(char* filename) {
     printf("In readFile()\n"); 
     FILE* f = fopen(filename, "r");
@@ -47,7 +44,7 @@ void error_and_exit(char* message){
 
 int main(int argc, char* argv[]) {
     //TODO: Get rid of old vars
-    char buffer[BUF_SIZE];
+    char buffer[PACKET_SIZE];
     struct sockaddr_in self, other;
     int len = sizeof(struct sockaddr_in);
     int message_length, sock, port;
@@ -91,9 +88,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    memset(buffer, 0, BUF_SIZE);
+    memset(buffer, 0, PACKET_SIZE);
     while(1){
-        if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
+        if ((message_length = recvfrom(sock, buffer, PACKET_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
             
             //file name from buffer and then get contents
             int filenamelength = strlen(buffer);
@@ -165,7 +162,7 @@ int main(int argc, char* argv[]) {
 
 
                 while(((message_length = recvfrom(sock, buffer, 
-                        BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
+                        PACKET_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
                     
                     packet *ACK_ptr = (packet *)buffer;
                     if(ACK_ptr == NULL)
@@ -178,7 +175,7 @@ int main(int argc, char* argv[]) {
                 //struct tm *timeinfo;
                 //time(&current_time);
                 //timeout = current_time + TTL;
-                //while((difftime(timeout,current_time) > 0) || ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
+                //while((difftime(timeout,current_time) > 0) || ((message_length = recvfrom(sock, buffer, PACKET_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
                 //    
                 //    packet *ACK_ptr = (packet *)buffer;
                 //    if(ACK_ptr == NULL)
