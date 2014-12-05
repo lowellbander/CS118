@@ -94,7 +94,8 @@ int main(int argc, char *argv[]) {
                 expected_sequence_number += strlen(packet_pointer->payload);
                 printf("expected_sequence_number was %lu and is now %lu\n", 
                         packet_pointer->seqnum, expected_sequence_number);
-                received_packets[nReceivedPackets++];
+                received_packets[nReceivedPackets] = *packet_pointer;
+                ++nReceivedPackets;
             }
 
             //TODO: construct an ACK and send it to the server
@@ -111,8 +112,14 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
+    printf("\nDone. Received %i packets.\n", nReceivedPackets);
 
     // TODO: write the received file to disk
+
+    // print received_packets;
+    int i;
+    for (i = 0; i < nReceivedPackets; ++i)
+        print_packet(&received_packets[i]);
 
     close(sock);
     return 0;
