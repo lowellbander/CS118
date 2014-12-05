@@ -9,3 +9,11 @@ typedef struct{
     char payload[PAYLOAD_SIZE];
 } packet;
 
+void print_packet(packet* packet_pointer) {
+    printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
+    printf("printing packet information: \n");
+    printf("Seq num: %lu\n", packet_pointer->seqnum);
+    printf("Total size: %lu\n", packet_pointer->total_size);
+    printf("Payload: %s\n", packet_pointer->payload);            
+    printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
+}
