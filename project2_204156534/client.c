@@ -66,9 +66,13 @@ int main(int argc, char *argv[]) {
     //     write(1, "\n", 1);
     // }
 
-    // TODO: initialize linked list of packets
+    
 
+
+    // this will store all the packets that we receive
     packet* received_packets = NULL;
+    unsigned long expected_sequence_number = 0;
+    int nReceivedPackets = 0;
 
     while (true) {
         // wait until there is a packet in the buffer
@@ -76,11 +80,9 @@ int main(int argc, char *argv[]) {
             printf("message_length: %i\n", message_length);
 
             packet* packet_pointer = (packet*) buffer;
-            printf("Seq num: %lu\n", packet_pointer->seqnum);
-            printf("Total size: %lu\n", packet_pointer->total_size);
-            printf("Payload: %s\n", packet_pointer->payload);            
+            print_packet(packet_pointer);
             
-            // TODO: initialize received_packets if we have not yet done so.
+            // initialize received_packets if we have not yet done so.
             if (received_packets == NULL) {
                 int nPackets = ((packet_pointer->total_size)/PAYLOAD_SIZE)*sizeof(packet);
                 received_packets = (packet*)calloc(nPackets, sizeof(packet));
@@ -91,8 +93,15 @@ int main(int argc, char *argv[]) {
             }
 
             //TODO: add the received packet to received_packets if appropriate
+            if (packet_pointer->seqnum == expected_sequence_number) {
+                expected_sequence_number += strlen(packet_pointer->payload);
+                printf("expected_sequence_number was %lu and is now %lu\n", 
+                        packet_pointer->seqnum, expected_sequence_number);
+                received_packets[nReceivedPackets++];
+            }
 
-            //if (packet->)
+            //TODO: send an ACK to the server
+
         }
     }
 
