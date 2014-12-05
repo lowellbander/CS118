@@ -74,9 +74,10 @@ int main(int argc, char *argv[]) {
     while (true) {
         // wait until there is a packet in the buffer
         if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
-            printf("message_length: %i\n", message_length);
+            //printf("message_length: %i\n", message_length);
 
             packet* packet_pointer = (packet*) buffer;
+            printf("just received packet:\n");
             print_packet(packet_pointer);
             
             // initialize received_packets if we have not yet done so.
@@ -95,8 +96,12 @@ int main(int argc, char *argv[]) {
                 printf("expected_sequence_number was %lu and is now %lu\n", 
                         packet_pointer->seqnum, expected_sequence_number);
                 received_packets[nReceivedPackets] = *packet_pointer;
+                printf("received_packets[%i]:\n", nReceivedPackets);
+                print_packet(&received_packets[nReceivedPackets]);
                 ++nReceivedPackets;
             }
+            else 
+                printf("was expecting seqnum of %lu but got %lu\n", expected_sequence_number, packet_pointer->seqnum);
 
             //TODO: construct an ACK and send it to the server
             packet ACK;
@@ -119,6 +124,7 @@ int main(int argc, char *argv[]) {
     // print received_packets;
     int i;
     for (i = 0; i < nReceivedPackets; ++i)
+        //printf("here is received_packets[%i]:\n", i);
         print_packet(&received_packets[i]);
 
     close(sock);

@@ -92,60 +92,60 @@ int main(int argc, char* argv[]) {
 
     memset(buffer, 0, BUF_SIZE);
     while(1){
-    if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
-        
-        int filenamelength = strlen(buffer);
-        char file_name[filenamelength+1];
-        file_name[filenamelength] = '\0';
-
-        /*printf("File name length: %i\n", filenamelength);
-        printf("file_name before copying from buffer: '%s'\n",file_name);
-        printf("Buffer: '%s'\n", buffer);
-        printf("strlen(buffer): %i\n", strlen(buffer));*/
-        
-        strncpy(file_name, &buffer, filenamelength);
-        printf("Request received from %s:%d ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
-        printf("for file: '%s'\n", file_name);
-        char* requested_file = readfile(file_name);
-        if(requested_file == NULL)
-            error_and_exit("readFile() failed.\n");
-
-        //get file size
-        struct stat st;
-        stat(file_name, &st);
-        int file_size = st.st_size;
-        printf("%s size: %i\n", file_name, file_size);
-
-        //number of packets
-        int number_of_packets = file_size / PAYLOAD_SIZE;
-        int dangling_bytes = file_size % PAYLOAD_SIZE;
-        if(dangling_bytes) number_of_packets++;
-        printf("Number of packets: %i\n", number_of_packets);
-        
-        //construct array of packets to send
-        packet packets_to_send[number_of_packets];
-        unsigned long i = 0;
-        for(; i<number_of_packets; ++i){
-            //Handling final packet if not payload is not full
-            if(i == number_of_packets-1 && dangling_bytes){
-                strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, dangling_bytes);
-
-                packets_to_send[i].seqnum = i*PAYLOAD_SIZE + dangling_bytes;         
-                printf("Last seq sent: %i\n", packets_to_send[i].seqnum);
-                printf("Number of packets: %i\n", number_of_packets);
-
-            }
-            else{
-                strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, PAYLOAD_SIZE);
-                packets_to_send[i].seqnum = i*PAYLOAD_SIZE;
-            }
-            packets_to_send[i].total_size = file_size;
-            printf("Sending packet %lu\n",i);
-            sendto(sock, (char *)&packets_to_send[i], PACKET_SIZE, 0, (struct sockaddr*) &other, len);
-         } 
-         break;         
-        //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
-    }    
+        if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
+            
+            int filenamelength = strlen(buffer);
+            char file_name[filenamelength+1];
+            file_name[filenamelength] = '\0';
+    
+            /*printf("File name length: %i\n", filenamelength);
+            printf("file_name before copying from buffer: '%s'\n",file_name);
+            printf("Buffer: '%s'\n", buffer);
+            printf("strlen(buffer): %i\n", strlen(buffer));*/
+            
+            strncpy(file_name, &buffer, filenamelength);
+            printf("Request received from %s:%d ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
+            printf("for file: '%s'\n", file_name);
+            char* requested_file = readfile(file_name);
+            if(requested_file == NULL)
+                error_and_exit("readFile() failed.\n");
+    
+            //get file size
+            struct stat st;
+            stat(file_name, &st);
+            int file_size = st.st_size;
+            printf("%s size: %i\n", file_name, file_size);
+    
+            //number of packets
+            int number_of_packets = file_size / PAYLOAD_SIZE;
+            int dangling_bytes = file_size % PAYLOAD_SIZE;
+            if(dangling_bytes) number_of_packets++;
+            printf("Number of packets: %i\n", number_of_packets);
+            
+            //construct array of packets to send
+            packet packets_to_send[number_of_packets];
+            unsigned long i = 0;
+            for(; i<number_of_packets; ++i){
+                //Handling final packet if not payload is not full
+                if(i == number_of_packets-1 && dangling_bytes){
+                    strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, dangling_bytes);
+    
+                    packets_to_send[i].seqnum = i*PAYLOAD_SIZE + dangling_bytes;         
+                    printf("Last seq sent: %i\n", packets_to_send[i].seqnum);
+                    printf("Number of packets: %i\n", number_of_packets);
+    
+                }
+                else{
+                    strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, PAYLOAD_SIZE);
+                    packets_to_send[i].seqnum = i*PAYLOAD_SIZE;
+                }
+                packets_to_send[i].total_size = file_size;
+                printf("Sending packet %lu\n",i);
+                sendto(sock, (char *)&packets_to_send[i], PACKET_SIZE, 0, (struct sockaddr*) &other, len);
+             } 
+             break;         
+            //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
+        }    
     }
 
     close(sock);
