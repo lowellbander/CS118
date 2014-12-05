@@ -53,19 +53,6 @@ int main(int argc, char *argv[]) {
     }
     printf("requesting file: '%s'\n", filename);
 
-    // TODO: delete this deprecated code
-    /* receive echo.
-    ** for single message, "while" is not necessary. But it allows the client 
-    ** to stay in listen mode and thus function as a "server" - allowing it to 
-    ** receive message sent from any endpoint.
-    */
-    // while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
-    //     printf("Received from %s:%d: \n",  inet_ntoa(server.sin_addr), ntohs(server.sin_port)); 
-    //     fflush(stdout);
-    //     write(1, buffer, message_length);
-    //     write(1, "\n", 1);
-    // }
-
     // this will store all the packets that we receive
     packet* received_packets = NULL;
     unsigned long expected_sequence_number = 0;
@@ -124,7 +111,6 @@ int main(int argc, char *argv[]) {
     // print received_packets;
     int i;
     for (i = 0; i < nReceivedPackets; ++i)
-        //printf("here is received_packets[%i]:\n", i);
         print_packet(&received_packets[i]);
 
     close(sock);
