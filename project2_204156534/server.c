@@ -78,12 +78,24 @@ int main(int argc, char* argv[]) {
         printf("'%s'\n", filename);
         //char* requested_file = readfile(filename);
         packet test_packet;
-        test_packet.seqnum = 0;
         char* first_message = "lo and behold";
+        char* second_message = "this is the second message";
+        //test_packet.total_size = strlen(first_message) + strlen(second_message);
         test_packet.total_size = strlen(first_message);
+
+        sleep(3);
+
         strcpy(test_packet.payload, first_message);
+        test_packet.seqnum = 0;
         sendto(sock, (char *)&test_packet, PACKET_SIZE, 0, (struct sockaddr*) &other, len);
-        //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
+
+        return;
+
+        sleep(3);
+
+        test_packet.seqnum = strlen(first_message);
+        strcpy(test_packet.payload, second_message);
+        sendto(sock, (char *)&test_packet, PACKET_SIZE, 0, (struct sockaddr*) &other, len);
     }
 
     close(sock);
