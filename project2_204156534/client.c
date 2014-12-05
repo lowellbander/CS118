@@ -17,10 +17,25 @@ int main(int argc, char *argv[]) {
     struct hostent *host;
     int message_length, sock, port;
 
-    if (argc < 4) {
-        fprintf(stderr, "Usage: %s <host> <port> <filename>\n", argv[0]);
+    if (argc < 6) {
+        fprintf(stderr, "Usage: %s <host> <port> <filename> <p_loss> <p_corrupt>\n", argv[0]);
         return 1;
     }
+
+    float p_loss = atof(argv[4]);
+    if (p_loss < 0 || p_loss > 1) {
+        printf("p_loss out of bounds. Must be 0 <= p_loss <= 1\n");
+        return 1;
+    }
+
+    float p_corrupt = atof(argv[5]);
+    if (p_corrupt < 0 || p_corrupt > 1) {
+        printf("p_corrupt out of bounds. Must be 0 <= p_corrupt <= 1\n");
+        return 1;
+    }
+
+    /*  Intializes random number generator */
+    srand(time(NULL));
 
     host = gethostbyname(argv[1]);
     if (host == NULL) {
@@ -56,13 +71,6 @@ int main(int argc, char *argv[]) {
     unsigned long expected_sequence_number = 0;
     unsigned total_size;
     int nReceivedPackets = 0;
-
-    // TODO: initialize p_loss & p_corrupt
-    // TODO: initialize these to the values gotten from the command line
-    double p_loss = 0.5;
-    double p_corrupt = 0.1;
-    /*  Intializes random number generator */
-    srand(time(NULL));
 
     while (true) {
         // wait until there is a packet in the buffer
