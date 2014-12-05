@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 #include "packet.h"
 
 #define BUF_SIZE 1024
@@ -94,15 +95,11 @@ int main(int argc, char* argv[]) {
     while(1){
         if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1) {
             
+            //file name from buffer and then get contents
             int filenamelength = strlen(buffer);
             char file_name[filenamelength+1];
             file_name[filenamelength] = '\0';
     
-            /*printf("File name length: %i\n", filenamelength);
-            printf("file_name before copying from buffer: '%s'\n",file_name);
-            printf("Buffer: '%s'\n", buffer);
-            printf("strlen(buffer): %i\n", strlen(buffer));*/
-            
             strncpy(file_name, &buffer, filenamelength);
             printf("Request received from %s:%d ", inet_ntoa(other.sin_addr), ntohs(other.sin_port)); 
             printf("for file: '%s'\n", file_name);
@@ -126,30 +123,77 @@ int main(int argc, char* argv[]) {
             packet packets_to_send[number_of_packets];
             unsigned long i = 0;
             for(; i<number_of_packets; ++i){
-                //Handling final packet if not payload is not full
+                //printf("Contructing packet %i\n",i); 
                 if(i == number_of_packets-1 && dangling_bytes){
+                    //Special case for handling last packet. 
                     strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, dangling_bytes);
                     packets_to_send[i].payload[dangling_bytes] = 0;
-                    packets_to_send[i].seqnum = i*PAYLOAD_SIZE;         
-    
                 }
                 else{
                     strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, PAYLOAD_SIZE);
                     packets_to_send[i].payload[PAYLOAD_SIZE] = 0;
-                    packets_to_send[i].seqnum = i*PAYLOAD_SIZE;
-                    
                 }
+                packets_to_send[i].seqnum = i*PAYLOAD_SIZE;         
                 packets_to_send[i].total_size = file_size;
-                printf("Sending packet %lu\n",i);
-                sendto(sock, (char *)&packets_to_send[i], PACKET_SIZE, 0, (struct sockaddr*) &other, len);
-             } 
-             printf("Last seq num sent: %lu\n", packets_to_send[number_of_packets-1].seqnum);
-             printf("Number of packets: %i\n", number_of_packets);
-             break;         
-            //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
+            } //end construction loop
+            printf("Packet construction finished.\n"); 
+
+            unsigned int TTL = 5; //time to wait for ACK
+            unsigned long highest_ACK_received = -1;
+            unsigned window_size = 5;
+            unsigned window_base = 0;
+    
+            /*time_t current_time, ;
+            struct tm *timeinfo;
+            time(&rawtime);
+            timeinfo = localtime(&rawtime);
+            printf("Current time: %s",asctime(timeinfo));
+            rawtime+=TTL;
+            timeinfo = localtime(&rawtime);
+            printf("Timeout at: %s", asctime(timeinfo));*/
+
+            //transmission loop
+            int test_var = 1;
+            while(test_var){
+            //while(highest_ACK_received != file_size){
+                unsigned j = window_base;
+                for(; j<window_base+window_size && j<number_of_packets; ++j){
+                    printf("Sending packet with sequence number: %lu\n", packets_to_send[j].seqnum);
+                    sendto(sock, (char*)&packets_to_send[j], PACKET_SIZE, 0, (struct sockaddr*)&other, len);
+                    //TODO: Start timer righta after first packet is sent.
+                }           
+
+
+                while(((message_length = recvfrom(sock, buffer, 
+                        BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
+                    
+                    packet *ACK_ptr = (packet *)buffer;
+                    if(ACK_ptr == NULL)
+                        error_and_exit("ACK buffer null\n");
+                    printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
+                    //break; 
+                }
+                
+                //time_t current_time, timeout;
+                //struct tm *timeinfo;
+                //time(&current_time);
+                //timeout = current_time + TTL;
+                //while((difftime(timeout,current_time) > 0) || ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
+                //    
+                //    packet *ACK_ptr = (packet *)buffer;
+                //    if(ACK_ptr == NULL)
+                //        error_and_exit("ACK buffer null\n");
+                //    printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
+                //    break; 
+                //}
+                //End ACK loop
+                test_var = 0;
+            } //End transmission loop
+            printf("Transmission over.\n");            
         }    
     }
-
     close(sock);
     return 0;
 }
+
+
