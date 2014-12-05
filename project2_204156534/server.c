@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
                 printf("Sending packet %lu\n",i);
                 sendto(sock, (char *)&packets_to_send[i], PACKET_SIZE, 0, (struct sockaddr*) &other, len);
              } 
-             printf("Last seq num sent: %i\n", packets_to_send[number_of_packets-1].seqnum);
+             printf("Last seq num sent: %lu\n", packets_to_send[number_of_packets-1].seqnum);
              printf("Number of packets: %i\n", number_of_packets);
              break;         
             //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
