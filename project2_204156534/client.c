@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include "packet.h"
 
 #define BUF_SIZE 2048
 
@@ -56,11 +58,22 @@ int main(int argc, char *argv[]) {
     ** to stay in listen mode and thus function as a "server" - allowing it to 
     ** receive message sent from any endpoint.
     */
-    while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
-        printf("Received from %s:%d: \n",  inet_ntoa(server.sin_addr), ntohs(server.sin_port)); 
-        fflush(stdout);
-        write(1, buffer, message_length);
-        write(1, "\n", 1);
+    // while ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
+    //     printf("Received from %s:%d: \n",  inet_ntoa(server.sin_addr), ntohs(server.sin_port)); 
+    //     fflush(stdout);
+    //     write(1, buffer, message_length);
+    //     write(1, "\n", 1);
+    // }
+
+    while (true) {
+        // wait until there is a packet in the buffer
+        if ((message_length = recvfrom(sock, buffer, BUF_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
+            printf("message_length: %i\n", message_length);
+            //packet received_packet = *buffer;
+            packet* packet_pointer = (packet*) buffer;
+            //printf
+            //if (packet->)
+        }
     }
 
     close(sock);
