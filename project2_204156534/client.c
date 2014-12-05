@@ -66,9 +66,6 @@ int main(int argc, char *argv[]) {
     //     write(1, "\n", 1);
     // }
 
-    
-
-
     // this will store all the packets that we receive
     packet* received_packets = NULL;
     unsigned long expected_sequence_number = 0;
@@ -92,7 +89,7 @@ int main(int argc, char *argv[]) {
                     printf("failed to intitialize received_packets.\n");
             }
 
-            //TODO: add the received packet to received_packets if appropriate
+            // add the received packet to received_packets if appropriate
             if (packet_pointer->seqnum == expected_sequence_number) {
                 expected_sequence_number += strlen(packet_pointer->payload);
                 printf("expected_sequence_number was %lu and is now %lu\n", 
@@ -100,10 +97,22 @@ int main(int argc, char *argv[]) {
                 received_packets[nReceivedPackets++];
             }
 
-            //TODO: send an ACK to the server
+            //TODO: construct an ACK and send it to the server
+            packet ACK;
+            ACK.seqnum = expected_sequence_number;
+            ACK.total_size = packet_pointer->total_size;
+            if (sendto(sock, (char*)&ACK, sizeof(packet), 0, (struct sockaddr*) &server, len) != -1)
+                printf("succesfully sent ACK with seqnum %lu\n", ACK.seqnum);
+            else 
+                printf("failed to send ACK with seqnum %lu\n", ACK.seqnum);
 
+            //if we just received the last packet, we're done
+            if (expected_sequence_number == packet_pointer->total_size)
+                break;
         }
     }
+
+    // TODO: write the received file to disk
 
     close(sock);
     return 0;
