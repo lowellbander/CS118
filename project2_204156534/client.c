@@ -57,13 +57,20 @@ int main(int argc, char *argv[]) {
     unsigned total_size;
     int nReceivedPackets = 0;
 
+    // TODO: initialize p_loss & p_corrupt
+    // TODO: initialize these to the values gotten from the command line
+    double p_loss = 0.5;
+    double p_corrupt = 0.1;
+    /*  Intializes random number generator */
+    srand(time(NULL));
+
     while (true) {
         // wait until there is a packet in the buffer
         if ((message_length = recvfrom(sock, buffer, PACKET_SIZE, 0, (struct sockaddr *) &server, &len)) != -1) {
 
             packet* packet_pointer = (packet*) buffer;
-            printf("just received packet:\n");
-            print_packet(packet_pointer);
+            //printf("just received packet:\n");
+            //print_packet(packet_pointer);
             
             // initialize received_packets if we have not yet done so.
             if (received_packets == NULL) {
@@ -76,20 +83,27 @@ int main(int argc, char *argv[]) {
                     printf("failed to intitialize received_packets.\n");
             }
 
+            //TODO: ignore dropped and corrupted packets
+            if (use_packet(p_loss)) {
+                printf("packet with seqnum %lu was lost\n", packet_pointer->seqnum);
+            }
+            else if (use_packet(p_corrupt)) {
+                printf("packet with seqnum %lu was corrupt\n", packet_pointer->seqnum);
+            }
             // add the received packet to received_packets if appropriate
-            if (packet_pointer->seqnum == expected_sequence_number) {
+            else if (packet_pointer->seqnum == expected_sequence_number) {
                 expected_sequence_number += strlen(packet_pointer->payload);
                 printf("expected_sequence_number was %lu and is now %lu\n", 
                         packet_pointer->seqnum, expected_sequence_number);
                 received_packets[nReceivedPackets] = *packet_pointer;
                 printf("received_packets[%i]:\n", nReceivedPackets);
-                print_packet(&received_packets[nReceivedPackets]);
+                //print_packet(&received_packets[nReceivedPackets]);
                 ++nReceivedPackets;
             }
             else 
                 printf("was expecting seqnum of %lu but got %lu\n", expected_sequence_number, packet_pointer->seqnum);
 
-            //TODO: construct an ACK and send it to the server
+            //construct an ACK and send it to the server
             packet ACK;
             ACK.seqnum = expected_sequence_number;
             ACK.total_size = packet_pointer->total_size;

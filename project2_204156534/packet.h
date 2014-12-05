@@ -1,6 +1,7 @@
 //packet struct
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define PACKET_SIZE 1024
 #define NULL_TERMINATOR 1
@@ -26,10 +27,9 @@ void print_packet(packet* packet_pointer) {
     printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
 }
 
-bool use_Packet(float probability){
-
+bool use_packet(float probability){
     int random = rand() % 100;
-    if(random > probability*100)
+    if(random < probability*100)
         return true;
     else 
         return false;
