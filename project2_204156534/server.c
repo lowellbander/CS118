@@ -79,8 +79,9 @@ int main(int argc, char* argv[]) {
         //char* requested_file = readfile(filename);
         packet test_packet;
         test_packet.seqnum = 0;
-        test_packet.total_size = 500;
-        strcpy(test_packet.payload,"lo and behold");
+        char* first_message = "lo and behold";
+        test_packet.total_size = strlen(first_message);
+        strcpy(test_packet.payload, first_message);
         sendto(sock, (char *)&test_packet, PACKET_SIZE, 0, (struct sockaddr*) &other, len);
         //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
     }
