@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
                     //TODO: Start timer righta after first packet is sent.
                 }           
 
-
+                //handle ACKs
                 while(((message_length = recvfrom(sock, buffer, 
                         PACKET_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
                     
@@ -168,8 +168,28 @@ int main(int argc, char* argv[]) {
                     if(ACK_ptr == NULL)
                         error_and_exit("ACK buffer null\n");
                     printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
-                    //break; 
-                }
+                    //break;
+
+                    if(use_packet(packet_corruption) || use_packet(packet_loss))
+                    {
+                                                
+                    }   
+                    else{
+                        if(ACK_ptr->seqnum > packets_to_send[window_base].seqnum){
+                            highest_ACK_received = ACK_ptr->seqnum;
+                            unsigned k = window_base;
+                            for(;k<window_base+window_size && k<number_of_packets; ++k){
+                                if(packets_to_send[k].seqnum == ACK_ptr->seqnum)
+                                    break;
+                            }
+                            window_base = k;
+                            printf("New window base: %i\n",window_base);
+                        }
+                        else{
+                            printf("ACK repeated: %lu\n",ACK_ptr->seqnum);
+                        }
+                    }  
+                } //End ACK handler loop
                 
                 //time_t current_time, timeout;
                 //struct tm *timeinfo;
