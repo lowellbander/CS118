@@ -129,20 +129,22 @@ int main(int argc, char* argv[]) {
                 //Handling final packet if not payload is not full
                 if(i == number_of_packets-1 && dangling_bytes){
                     strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, dangling_bytes);
-    
-                    packets_to_send[i].seqnum = i*PAYLOAD_SIZE + dangling_bytes;         
-                    printf("Last seq sent: %i\n", packets_to_send[i].seqnum);
-                    printf("Number of packets: %i\n", number_of_packets);
+                    packets_to_send[i].payload[dangling_bytes] = 0;
+                    packets_to_send[i].seqnum = i*PAYLOAD_SIZE;         
     
                 }
                 else{
                     strncpy(packets_to_send[i].payload, requested_file+i*PAYLOAD_SIZE, PAYLOAD_SIZE);
+                    packets_to_send[i].payload[PAYLOAD_SIZE] = 0;
                     packets_to_send[i].seqnum = i*PAYLOAD_SIZE;
+                    
                 }
                 packets_to_send[i].total_size = file_size;
                 printf("Sending packet %lu\n",i);
                 sendto(sock, (char *)&packets_to_send[i], PACKET_SIZE, 0, (struct sockaddr*) &other, len);
              } 
+             printf("Last seq num sent: %i\n", packets_to_send[number_of_packets-1].seqnum);
+             printf("Number of packets: %i\n", number_of_packets);
              break;         
             //sendto(sock, requested_file, strlen(requested_file), 0, (struct sockaddr*) &other, len);
         }    
