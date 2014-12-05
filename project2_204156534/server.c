@@ -39,10 +39,14 @@ int main(int argc, char* argv[]) {
     int len = sizeof(struct sockaddr_in);
     int message_length, sock, port;
 
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
-        return 1;
+    if (argc != 2 && argc != 4) {
+        fprintf(stderr, "Usage: %s <port> [<packet loss> <packet corruption>]\n", argv[0]);
+        exit(1);
     }
+
+    //use args
+    //timer setup
+    //network to host byte order
 
     /* initialize socket */
     if ((sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {

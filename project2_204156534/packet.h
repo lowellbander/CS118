@@ -1,11 +1,10 @@
 //packet struct
 
-#define PAYLOAD_SIZE 800
-typedef enum {DATA, ACK, END} packetType;
+#define PAYLOAD_SIZE (1024 - 2*sizeof(long))
 
 typedef struct{
-    packetType type;
-    char seqnum[16];
+    long seqnum;
+    long total_size; 
     char payload[PAYLOAD_SIZE];
 } packet;
 
