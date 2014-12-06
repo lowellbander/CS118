@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
     // copy contents from packets to our temporary buffer
     for (i = 0; i < nReceivedPackets; ++i)
         strcat(file_contents, received_packets[i].payload);
-    FILE* f = fopen("received.txt", "w");
+    FILE* f = fopen("received.txt", "wb");
     if (f == NULL)
         printf("failed to open file\n");
     fwrite(file_contents, sizeof(char), total_size, f);

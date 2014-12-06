@@ -151,7 +151,11 @@ int main(int argc, char* argv[]) {
                         //TODO: Start timer righta after first packet is sent.
                         if(j == window_base){
                               timeout = time(0) + TTL; 
-                              printf("Timeout reseti\n"); 
+                              printf("Timeout reset\n");
+                              if(j == number_of_packets -1){
+                                printf("Transmission over-.\n");
+                                exit(EXIT_SUCCESS);
+                              } 
                         }
                     }
                 }
