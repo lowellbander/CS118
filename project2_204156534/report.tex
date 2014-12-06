@@ -1,0 +1,30 @@
+\documentclass{article}
+\begin{document}
+\title{CS 118 Project 2}
+\author{Lowell Bander, UID 204 156 534\\Akshay Bakshi, UID 104 160 782}
+\maketitle
+\section{Implementation}
+\subsection{Header Format}
+In addition to the payload of our packets, each packet has two headers: \texttt{seqnum}, which stores the sequence number of the packet, and \texttt{total\_size}, which stores the total size of the file being transmitted. The former field is used for ACKS, and the latter field is to determine whether the packet received is the last packet to be received.
+\subsection{Messages}
+The remaining bytes in each packet which are not used for headers are used for the payload of the packet, which is a subset of the contents of the original file. These messages are concatenated by the client after all packets are received to form the final received file.
+\subsection{Timeouts}
+The TTL for our program is hard coded. Each time a new packet is sent by the server, the time at which timeout time is reset to the sum of the current time and TTL. After the server sends the packets in its window, it spinblocks until it received a valid ACK from the client. At each iteration of the spinblock, the code checks to see if the timeout has expired. If this is the case, it resends the packets in its current window.
+\subsection{Window-Based Protocol}
+For this project, we chose to use the Go-Back-N protocol. This means that until all packets to be sent have been ACKed, the server will send the packets in its current window, moving the window across the list of packets to send whenever it received a valid ACK for a packet from the client that has not yet been ACKed. \\
+
+In turn, the client waits to receive packets, and whenever it does, checks to see whether this was the packet that it was expecting. If it was, it send an ACK to the client with the sequence number of the next packet it wishes to receive. If not, the client will send to the server an ACK corresponding to the packet it has been waiting to receive but has not yet received.
+\section{Difficulties}
+\subsection{Saving to File on Client}
+On the client side, after having received all packets, we were experiencing errors with writing to file. We discovered that this was an \texttt{EACCESS} problem, and solved it by running or client code with \texttt{sudo}.
+\subsection{Dropped Final ACK}
+If ACK for the final packet that the client sends to the server is dropped, the client will close because it has finished, but the server will continuously resend the packet because it will never receive an ACK for the last packet. \\
+
+We considered solving this problem by having the client wait for an ACK for the ACK it just sent, but we thought this could simply result in an infinite loop, so we just left it as is.
+\subsection{Timeouts}
+Our largest difficulty was implementing the timeout protocol. For reasons not yet known to us, when the server receives a corrupted ACK from the client, the server becomes caught in an infinite loop, continuously claiming that the timeout has occurred. 
+
+We fixed some last minute timeout resets and were able to successfully handle when ACKs received by the server were dropped and/or corrupted.
+
+\end{document}
+
