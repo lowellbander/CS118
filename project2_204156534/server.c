@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
                 for(j=window_base; j<window_base+window_size && j<number_of_packets; ++j){
                     printf("j: %i and highest_packet_sent: %i and highest_ACKed_pkt: %i\n", j, highest_packet_sent, seqnum_to_packetnum(highest_ACK_received));
                     if(j > seqnum_to_packetnum(highest_ACK_received)){
-                        printf("Sending packet %i with sequence number: %lu\n", j, packets_to_send[j].seqnum);
+                        printf("Sending packet %i with sequence number: %lu\n\n", j, packets_to_send[j].seqnum);
                         sendto(sock, (char*)&packets_to_send[j], PACKET_SIZE, 0, (struct sockaddr*)&other, len);
                         highest_packet_sent = j;
                         //TODO: Start timer righta after first packet is sent.
@@ -188,10 +188,10 @@ int main(int argc, char* argv[]) {
                     packet *ACK_ptr = (packet *)buffer;
                     if(ACK_ptr == NULL)
                         error_and_exit("ACK buffer null\n");
-                    printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
 
                     if(use_packet(packet_corruption))
                     {
+                        printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
                         printf("ACK was corrupted\n");                            
                     }   
                     else if(use_packet(packet_loss)){
@@ -199,6 +199,7 @@ int main(int argc, char* argv[]) {
                     }
                     else{
                             
+                        printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
                         if(ACK_ptr->seqnum > packets_to_send[window_base].seqnum){
                             highest_ACK_received = ACK_ptr->seqnum;
                             
@@ -215,8 +216,8 @@ int main(int argc, char* argv[]) {
                             {
                                 int l=highest_packet_sent+1;
                                 for(;l<window_end && l<number_of_packets;l++){
-                                    printf("Window shifted. Sending packet %i with sequence number: %lu\n\n",l, packets_to_send[l].seqnum);
-                                    printf("Highest_ACKed_pkt: %i\n", seqnum_to_packetnum(highest_ACK_received));
+                                    printf("Window shifted. Sending packet %i with sequence number: %lu\n\n\n",l, packets_to_send[l].seqnum);
+                            //        printf("Highest_ACKed_pkt: %i\n", seqnum_to_packetnum(highest_ACK_received));
                                     sendto(sock, (char*)&packets_to_send[l],PACKET_SIZE,0,(struct sockaddr*)&other,len);
                                     highest_packet_sent = l;           
                                     timeout = time(0) + TTL;
