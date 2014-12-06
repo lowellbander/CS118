@@ -130,26 +130,22 @@ int main(int argc, char* argv[]) {
 
             unsigned int TTL = 5; //time to wait for ACK
             unsigned long highest_ACK_received = -1;
+            int highest_packet_sent = -1;
             unsigned window_size = 5;
             unsigned window_base = 0;
     
-            /*time_t current_time, ;
-            struct tm *timeinfo;
-            time(&rawtime);
-            timeinfo = localtime(&rawtime);
-            printf("Current time: %s",asctime(timeinfo));
-            rawtime+=TTL;
-            timeinfo = localtime(&rawtime);
-            printf("Timeout at: %s", asctime(timeinfo));*/
-
             //transmission loop
-            unsigned j = window_base;
+            int j = window_base;
             while(highest_ACK_received != file_size){
                 for(; j<window_base+window_size && j<number_of_packets; ++j){
-                    printf("Sending packet with sequence number: %lu\n", packets_to_send[j].seqnum);
-                    sendto(sock, (char*)&packets_to_send[j], PACKET_SIZE, 0, (struct sockaddr*)&other, len);
+                    if(j > highest_packet_sent){
+                        printf("Sending packet %i with sequence number: %lu\n", j, packets_to_send[j].seqnum);
+                        sendto(sock, (char*)&packets_to_send[j], PACKET_SIZE, 0, (struct sockaddr*)&other, len);
+                        highest_packet_sent = j;
                     //TODO: Start timer righta after first packet is sent.
-                }           
+                        }
+                    }
+                           
                     
                 //last ack for current window
                 long window_last_seqnum = -1;
@@ -183,6 +179,12 @@ int main(int argc, char* argv[]) {
                             }
                             window_base = k;
                             printf("New window base: %i\n",window_base);
+                            if(window_base+window_size>highest_packet_sent && window_base+window_size<number_of_packets)
+                            {
+                                printf("Window shifted. Sending packet %i with sequence number: %lu\n",window_base+window_size-1, packets_to_send[window_base+window_size-1].seqnum);
+                                sendto(sock, (char*)&packets_to_send[window_base+window_size-1],PACKET_SIZE,0,(struct sockaddr*)&other,len);
+                                highest_packet_sent = window_base+window_size-1;           
+                            }
                         }
                         else{
                             printf("ACK repeated: %lu\n",ACK_ptr->seqnum);
@@ -192,7 +194,7 @@ int main(int argc, char* argv[]) {
                             break;
                         }
                         if(highest_ACK_received == window_last_seqnum){
-                            printf("Last ack of current window received\n");
+                            //printf("Last ack of current window received\n");
                             break;
                         }
                     }  
