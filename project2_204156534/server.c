@@ -52,25 +52,18 @@ int main(int argc, char* argv[]) {
     float packet_loss = 0;
     float packet_corruption = 0;
 
-    if (argc != 3 && (argc < 2 || argc > 4)) {
-        error_and_exit("Usage: ./server <port> [<packet loss> <packet corruption>]\nPacket loss and packet corruption values must be from 0.0 - 1.0\n");
+    if (argc != 4) {
+        error_and_exit("Usage: ./server <port> <packet loss> <packet corruption>\nPacket loss and packet corruption values must be from 0.0 - 1.0\n");
     }
 
     //use args
-    if(argc == 2){
-        port = atoi(argv[1]); 
-        //OS might reject some port numbers
-    }
-    else{        
-        packet_loss =  atof(argv[2]);
-        packet_corruption = atof(argv[3]);
-        if(packet_loss < 0.0 || packet_loss > 1.0)
-            error_and_exit("Invalid value for packet_loss.\n");
-        if(packet_corruption < 0 || packet_corruption > 1)
-            error_and_exit("Invalid value for packet_corruption.\n");
-    }    
-    //timer setup
-    //network to host byte order
+    port = atoi(argv[1]);
+    packet_loss =  atof(argv[2]);
+    packet_corruption = atof(argv[3]);
+    if(packet_loss < 0.0 || packet_loss > 1.0)
+       error_and_exit("Invalid value for packet_loss.\n");
+    if(packet_corruption < 0 || packet_corruption > 1)
+       error_and_exit("Invalid value for packet_corruption.\n");
 
     /* initialize socket */
     if ((sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
@@ -150,16 +143,21 @@ int main(int argc, char* argv[]) {
             printf("Timeout at: %s", asctime(timeinfo));*/
 
             //transmission loop
-            int test_var = 1;
-            while(test_var){
-            //while(highest_ACK_received != file_size){
-                unsigned j = window_base;
+            unsigned j = window_base;
+            while(highest_ACK_received != file_size){
                 for(; j<window_base+window_size && j<number_of_packets; ++j){
                     printf("Sending packet with sequence number: %lu\n", packets_to_send[j].seqnum);
                     sendto(sock, (char*)&packets_to_send[j], PACKET_SIZE, 0, (struct sockaddr*)&other, len);
                     //TODO: Start timer righta after first packet is sent.
                 }           
-
+                    
+                //last ack for current window
+                long window_last_seqnum = -1;
+                        if(window_base+window_size-1 > number_of_packets-1)
+                            window_last_seqnum = packets_to_send[number_of_packets-1].seqnum;
+                        else
+                            window_last_seqnum = packets_to_send[window_base+window_size-1].seqnum;
+                
                 //handle ACKs
                 while(((message_length = recvfrom(sock, buffer, 
                         PACKET_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
@@ -168,15 +166,16 @@ int main(int argc, char* argv[]) {
                     if(ACK_ptr == NULL)
                         error_and_exit("ACK buffer null\n");
                     printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
-                    //break;
 
                     if(use_packet(packet_corruption) || use_packet(packet_loss))
                     {
-                                                
+                        printf("ACK was lost or corrupted");                            
                     }   
                     else{
+                            
                         if(ACK_ptr->seqnum > packets_to_send[window_base].seqnum){
                             highest_ACK_received = ACK_ptr->seqnum;
+                            
                             unsigned k = window_base;
                             for(;k<window_base+window_size && k<number_of_packets; ++k){
                                 if(packets_to_send[k].seqnum == ACK_ptr->seqnum)
@@ -188,23 +187,22 @@ int main(int argc, char* argv[]) {
                         else{
                             printf("ACK repeated: %lu\n",ACK_ptr->seqnum);
                         }
+                        if(highest_ACK_received == file_size){
+                            printf("Final ACK received.\n");
+                            break;
+                        }
+                        if(highest_ACK_received == window_last_seqnum){
+                            printf("Last ack of current window received\n");
+                            break;
+                        }
                     }  
                 } //End ACK handler loop
-                
+                printf("highest_ACK_received: %lu\n", highest_ACK_received);
                 //time_t current_time, timeout;
                 //struct tm *timeinfo;
                 //time(&current_time);
                 //timeout = current_time + TTL;
-                //while((difftime(timeout,current_time) > 0) || ((message_length = recvfrom(sock, buffer, PACKET_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
-                //    
-                //    packet *ACK_ptr = (packet *)buffer;
-                //    if(ACK_ptr == NULL)
-                //        error_and_exit("ACK buffer null\n");
-                //    printf("ACK packet received with sequence num: %lu\n",ACK_ptr->seqnum); 
-                //    break; 
-                //}
-                //End ACK loop
-                test_var = 0;
+            
             } //End transmission loop
             printf("Transmission over.\n");            
         }    
