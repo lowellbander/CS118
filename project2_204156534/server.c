@@ -33,7 +33,9 @@ char* readfile(char* filename) {
     fclose(f);
     return contents;
 }
-
+int seqnum_to_packetnum(long seqnum){
+    return seqnum/PAYLOAD_SIZE-1;
+}
 void error_and_exit(char* message){
     if(message != NULL)
         fputs(message, stderr);
@@ -129,23 +131,30 @@ int main(int argc, char* argv[]) {
             printf("Packet construction finished.\n"); 
 
             unsigned int TTL = 5; //time to wait for ACK
-            long highest_ACK_received = -1;
+            long highest_ACK_received = 0;
             int highest_packet_sent = -1;
+            int highest_ACKed_pkt = -1;
             unsigned window_size = 5;
             unsigned window_base = 0;
+            time_t timeout;
     
             //transmission loop
             int j = window_base;
             while(highest_ACK_received != file_size){
                 printf("\nCurrent window base: %i\n",window_base);
-                for(; j<window_base+window_size && j<number_of_packets; ++j){
-                    if(j > highest_packet_sent){
+                for(j=window_base; j<window_base+window_size && j<number_of_packets; ++j){
+                    printf("j: %i and highest_packet_sent: %i and highest_ACKed_pkt: %i\n", j, highest_packet_sent, seqnum_to_packetnum(highest_ACK_received));
+                    if(j > seqnum_to_packetnum(highest_ACK_received)){
                         printf("Sending packet %i with sequence number: %lu\n", j, packets_to_send[j].seqnum);
                         sendto(sock, (char*)&packets_to_send[j], PACKET_SIZE, 0, (struct sockaddr*)&other, len);
                         highest_packet_sent = j;
                         //TODO: Start timer righta after first packet is sent.
+                        if(j == window_base){
+                              timeout = time(0) + TTL; 
+                              printf("Timeout reseti\n"); 
                         }
                     }
+                }
                            
                     
                 //last ack for current window
@@ -155,10 +164,23 @@ int main(int argc, char* argv[]) {
                         else
                             window_last_seqnum = packets_to_send[window_base+window_size-1].seqnum;
                 
+                
+                const int FLAGS = MSG_DONTWAIT;
+                
                 //handle ACKs
-                while(((message_length = recvfrom(sock, buffer, 
-                        PACKET_SIZE, 0, (struct sockaddr *) &other, &len)) != -1)){
-                    
+                while(1){
+                    time_t now = time(0);
+                    if(difftime(timeout, now) <= 0){
+                        printf("TIMEOUT\n");
+                       return;
+                        break;
+                    }
+
+                    message_length = recvfrom(sock, buffer, PACKET_SIZE, FLAGS, (struct sockaddr*)&other, &len);
+                    if(message_length == -1){
+                        continue;
+                    }
+        
                     packet *ACK_ptr = (packet *)buffer;
                     if(ACK_ptr == NULL)
                         error_and_exit("ACK buffer null\n");
@@ -192,6 +214,7 @@ int main(int argc, char* argv[]) {
                                     printf("Window shifted. Sending packet %i with sequence number: %lu\n\n",l, packets_to_send[l].seqnum);
                                     sendto(sock, (char*)&packets_to_send[l],PACKET_SIZE,0,(struct sockaddr*)&other,len);
                                     highest_packet_sent = l;           
+                                    timeout = time(0) + TTL;
                                 }
                             }
                         }

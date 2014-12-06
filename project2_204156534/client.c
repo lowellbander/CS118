@@ -115,6 +115,7 @@ int main(int argc, char *argv[]) {
             packet ACK;
             ACK.seqnum = expected_sequence_number;
             ACK.total_size = packet_pointer->total_size;
+            //sleep(1);
             if (sendto(sock, (char*)&ACK, sizeof(packet), 0, (struct sockaddr*) &server, len) != -1)
                 printf("succesfully sent ACK with seqnum %lu\n", ACK.seqnum);
             else 
