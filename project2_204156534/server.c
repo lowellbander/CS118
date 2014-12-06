@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
                     time_t now = time(0);
                     if(difftime(timeout, now) <= 0){
                         printf("TIMEOUT\n");
-                       return;
+                        //return;
                         break;
                     }
 
@@ -212,6 +212,7 @@ int main(int argc, char* argv[]) {
                                 int l=highest_packet_sent+1;
                                 for(;l<window_end && l<number_of_packets;l++){
                                     printf("Window shifted. Sending packet %i with sequence number: %lu\n\n",l, packets_to_send[l].seqnum);
+                                    printf("Highest_ACKed_pkt: %i\n", seqnum_to_packetnum(highest_ACK_received));
                                     sendto(sock, (char*)&packets_to_send[l],PACKET_SIZE,0,(struct sockaddr*)&other,len);
                                     highest_packet_sent = l;           
                                     timeout = time(0) + TTL;
